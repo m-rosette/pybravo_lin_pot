@@ -109,16 +109,17 @@ class PitchCompliance():
         self.joint_positions[packet.device_id.value - 1] = position
 
     def read_daq(self, physical_chan="Dev1/ai1", num_samples=1):
-        # TODO: Need to see if I can get rid of the num_samples since I have while loop
+        """Sample the DAQ and read its value"""
         while self._running:
             with nidaqmx.Task() as task:
+                # Add channel from daq and set the configuration reader
                 task.ai_channels.add_ai_voltage_chan(physical_chan, terminal_config=self.RSE)
                 
+                # Read the voltage
                 self.voltage_reading = task.read(number_of_samples_per_channel=num_samples)
-            # time.sleep(0.01)    # Does this go under the "with"???
-            # TODO: Might need to add a 0.01 delay to match the incoming joint data (time.sleep(0.01))
     
     def _get_config(self):
+        """Load a predetermined configuration data set for the bravo"""
         all_configs = self._config_loader.load_matfile_data()
         self.desired_config = all_configs[self.desired_config_num]
 
@@ -131,6 +132,9 @@ class PitchCompliance():
                 self.joint_positions,
                 self.voltage_reading,
             )
+
+            # Adding a delay for sensors to establish connection and start sampling
+            time.sleep(0.25)
 
             # Create the packets and send them to the Bravo   
             # TODO: Try and see if you can send the Packet to ALL_JOINTS instead of individually 

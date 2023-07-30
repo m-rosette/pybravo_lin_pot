@@ -23,28 +23,27 @@ class NI_Device:
         atexit.register(self.stop)
 
     def start(self) -> None:
-        """Start the joint position reader."""
-        # TODO: Do I need to have a connect() statement for sensor? (with nidaqmx.Task().....etc..?)
-
+        """Start the daq reader."""
         # Start the polling thread
         self._running = True
         self.poll_t.start()
 
     def stop(self) -> None:
-        """Stop the joint position reader."""
+        """Stop the daq reader."""
         # Stop the poll thread loop
         self._running = False
         self.poll_t.join()
 
     def read_daq(self, physical_chan="Dev1/ai1", num_samples=1):
-        # TODO: Need to see if I can get rid of the num_samples since I have while loop
+        """Sample the DAQ and read its value"""
         while self._running:
             with nidaqmx.Task() as task:
+                # Add channel from daq and set the configuration reader
                 task.ai_channels.add_ai_voltage_chan(physical_chan, terminal_config=self.RSE)
                 
+                # Read the voltage
                 self.voltage_reading = task.read(number_of_samples_per_channel=num_samples)
-            # time.sleep(0.01)    # Does this go under the "with"???
-            # TODO: Might need to add a 0.01 delay to match the incoming joint data (time.sleep(0.01))
+            time.sleep(0.01)
     
     def plot_data(self, data):
         plt.plot(data, '.')
