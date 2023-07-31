@@ -7,9 +7,11 @@ sys.path.append("..")
 
 class ArmConfig:
     def __init__(self):
+        # Predetermined home position
         self.initial_config = np.array([0, 1.57, 2.64, 0, 0.6, 3.04, 3.14])
+        self.desired_config = self.initial_config
 
-    def load_matfile_data(self, data_file="C:/Users/marcu/OneDrive/Documents/GitHub/pybravo_linear_potentiometer/scripts/data/hardware_configs.mat", flip_joint_order=True, add_home=True):
+    def load_matfile_data(self, data_file="data/hardware_configs.mat", flip_joint_order=True, add_home=True):
         # Load file from file path
         file = mat73.loadmat(data_file)
 
@@ -25,6 +27,11 @@ class ArmConfig:
             configs = np.insert(configs, 0, self.initial_config, 0)
         
         return configs
+    
+    def _get_config(self, desired_config_num):
+        """Load predetermined configurations of the arm"""
+        all_configs = self.load_matfile_data()
+        self.desired_config = all_configs[desired_config_num]
     
 
 if __name__ == '__main__':

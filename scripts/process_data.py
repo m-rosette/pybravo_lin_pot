@@ -63,7 +63,7 @@ class ProcessData():
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)
-        plt.legend(legend)
+        plt.legend(legend, loc='right')
         plt.show()
 
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     pdata = ProcessData()
 
     # Parse log file nad extract variable elements
-    filename = "logs/2023-07-29-18-13-04.log"
+    filename = "logs/2023-07-31-09-04-29.log"
     pdata.parse_data_file(filename, num_initial_line_skip=10)
     pdata.extract_elements()
 
@@ -86,8 +86,13 @@ if __name__ == '__main__':
                     xlabel='Time (s)',
                     legend=['joint 1', 'joint 2', 'joint 3', 'joint 4', 'joint 5', 'joint 6', 'joint 7'])
 
-    pdata.plot_data(pdata.timestamp, pdata.pitch, 
-                    title='Frame Pitch over Bravo Trajectory', 
-                    ylabel='Pitch (deg)', 
+    pdata.plot_data(pdata.timestamp, pdata.voltage_reading, 
+                    title='Voltage over Bravo Trajectory', 
+                    ylabel='Voltage (V)', 
                     xlabel='Time (s)')
+    
+    # pdata.plot_data(pdata.timestamp, pdata.pitch, 
+    #                 title='Frame Pitch over Bravo Trajectory', 
+    #                 ylabel='Pitch (deg)', 
+    #                 xlabel='Time (s)')
     

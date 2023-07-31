@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 class NI_Device:
     def __init__(self):
         ''' Create a new NI device interface'''
-        # self.ni_
         self.RSE = TerminalConfiguration.RSE
         self._running = False
         self.voltage_reading = 0
@@ -35,7 +34,7 @@ class NI_Device:
         self.poll_t.join()
 
     def read_daq(self, physical_chan="Dev1/ai1", num_samples=1):
-        """Sample the DAQ and read its value"""
+        """Sample the DAQ at a rate of 100Hz"""
         while self._running:
             with nidaqmx.Task() as task:
                 # Add channel from daq and set the configuration reader
@@ -45,6 +44,7 @@ class NI_Device:
                 self.voltage_reading = task.read(number_of_samples_per_channel=num_samples)
     
     def plot_data(self, data):
+        """Plot the DAQ output voltage"""
         plt.plot(data, '.')
         plt.ylabel('Output voltage (V)')
         plt.show()

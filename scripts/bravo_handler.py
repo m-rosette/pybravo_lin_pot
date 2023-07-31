@@ -6,16 +6,17 @@ import sys
 import threading
 import time
 
-from logger import FileLogger, init_logger
 from pybravo import BravoDriver, DeviceID, Packet, PacketID
 
 
 class BravoHandler:
     """Sends and request position messages from the Bravo."""
 
-    def __init__(self) -> None:
+    def __init__(self, desired_config) -> None:
         """Create a new joint position interface."""
         self._bravo = BravoDriver()
+
+        self.desired_config = desired_config
 
         self._running = False
         self.num_joints = 7
@@ -35,7 +36,7 @@ class BravoHandler:
         atexit.register(self.stop)
 
     def start(self) -> None:
-        """Start the joint position reader."""
+        """Start the bravo. Starts position reader and commander."""
         # Start a connection to the Bravo
         self._bravo.connect()
 
@@ -45,13 +46,12 @@ class BravoHandler:
         self.controller_t.start()
 
     def stop(self) -> None:
-        """Stop the joint position reader."""
-        # Stop the poll thread loop
-        self._running = False
-
+        """Stop the bravo. Stops position reader and commander."""
         # Disconnect the bravo driver
         self._bravo.disconnect()
 
+        # Stop the poll thread loop
+        self._running = False
         self.poll_t.join()
         self.controller_t.join()
 
@@ -81,10 +81,10 @@ class BravoHandler:
         # Save the joint positions at the same index as their ID
         self.joint_positions[packet.device_id.value - 1] = position
 
-    def _run_controller(self, desired_config):
+    def _run_controller(self):
         # Create the packets and send them to the Bravo   
         # TODO: Try and see if you can send the Packet to ALL_JOINTS instead of individually 
-        for i, position in enumerate(desired_config):
+        for i, position in enumerate(self.desired_config):
             packet = Packet(DeviceID(i+1), PacketID.POSITION, struct.pack("<f", position))
             self._bravo.send(packet)
 
