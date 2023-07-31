@@ -43,7 +43,6 @@ class NI_Device:
                 
                 # Read the voltage
                 self.voltage_reading = task.read(number_of_samples_per_channel=num_samples)
-            time.sleep(0.01)
     
     def plot_data(self, data):
         plt.plot(data, '.')
