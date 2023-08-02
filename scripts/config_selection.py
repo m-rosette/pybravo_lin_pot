@@ -23,6 +23,8 @@ if __name__ == "__main__":
     configs_fl = np.fliplr(configs)
     final_configs_fl = np.insert(configs_fl, 0, initial_config, 0)
 
+    print("\nWARNING: Joint 1 (gripper - prismatic joint) operates in a range from 0.0-10.0mm\nThe jaw opening is max at ~100mm\n")
+
     control_type = input("Enter desired control type (s or t): ")
     if control_type == "t":
         traj_number = int(input(f"Enter configuration number (0-{len(final_configs_fl)-1}): "))
@@ -37,7 +39,7 @@ if __name__ == "__main__":
         # Send singular joint commands
         print("Joints: End-effector = 1, ... Base = 7")
         joint_id = int(input("Joint to Control: "))
-        joint_pos = float(input("Desired Position: "))
+        joint_pos = float(input("Desired Position (enter as float): "))
         packet = Packet(DeviceID(joint_id), PacketID.POSITION, struct.pack("<f", joint_pos))
         bravo.send(packet)
         time.sleep(1)
