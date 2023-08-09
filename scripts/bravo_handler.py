@@ -12,11 +12,9 @@ from pybravo import BravoDriver, DeviceID, Packet, PacketID
 class BravoHandler:
     """Sends and request position messages from the Bravo."""
 
-    def __init__(self, desired_config) -> None:
+    def __init__(self) -> None:
         """Create a new joint position interface."""
         self._bravo = BravoDriver()
-
-        self.desired_config = desired_config
 
         self._running = False
         self.num_joints = 7
@@ -28,9 +26,9 @@ class BravoHandler:
         self.poll_t = threading.Thread(target=self.poll_joint_angles)
         self.poll_t.daemon = True
 
-        # Run the controller in it's own thread
-        self.controller_t = threading.Thread(target=self._run_controller)
-        self.controller_t.daemon = True
+        # # Run the controller in it's own thread
+        # self.controller_t = threading.Thread(target=self._run_controller)
+        # self.controller_t.daemon = True
 
         # Make sure that we shutdown the interface when we exit
         atexit.register(self.stop)
@@ -43,7 +41,7 @@ class BravoHandler:
         # Start the polling thread
         self._running = True
         self.poll_t.start()
-        self.controller_t.start()
+        # self.controller_t.start()
 
     def stop(self) -> None:
         """Stop the bravo. Stops position reader and commander."""
@@ -53,7 +51,7 @@ class BravoHandler:
         # Stop the poll thread loop
         self._running = False
         self.poll_t.join()
-        self.controller_t.join()
+        # self.controller_t.join()
 
     def poll_joint_angles(self) -> None:
         """Request the current joint positions at a rate of 100 Hz."""
@@ -81,10 +79,10 @@ class BravoHandler:
         # Save the joint positions at the same index as their ID
         self.joint_positions[packet.device_id.value - 1] = position
 
-    def _run_controller(self):
+    def _run_controller(self, desired_config):
         # Create the packets and send them to the Bravo   
         # TODO: Try and see if you can send the Packet to ALL_JOINTS instead of individually 
-        for i, position in enumerate(self.desired_config):
+        for i, position in enumerate(desired_config):
             packet = Packet(DeviceID(i+1), PacketID.POSITION, struct.pack("<f", position))
             self._bravo.send(packet)
 
@@ -103,8 +101,8 @@ if __name__ == "__main__":
     # To read joint positions
     while True:
         try:
-            print(f"The current joint positions are: {handler.joint_positions}")
-            time.sleep(0.1)
+            # print(f"The current joint positions are: {handler.joint_positions}")
+            time.sleep(0.01)
         except KeyboardInterrupt:
             handler.stop()
             sys.exit()

@@ -66,9 +66,9 @@ class JointReader:
         # data is received (i.e., Windows vs Linux)
         position: float = struct.unpack("<f", packet.data)[0]
 
-        # The jaws are a linear joint; convert from mm to m
-        if packet.device_id == DeviceID.LINEAR_JAWS:
-            position *= 0.001
+        # # The jaws are a linear joint; convert from mm to m
+        # if packet.device_id == DeviceID.LINEAR_JAWS:
+        #     position *= 0.001
 
         # Save the joint positions at the same index as their ID
         self.joint_positions[packet.device_id.value - 1] = position

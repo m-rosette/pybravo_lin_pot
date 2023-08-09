@@ -42,7 +42,7 @@ if __name__ == "__main__":
         joint_pos = float(input("Desired Position (enter as float): "))
         packet = Packet(DeviceID(joint_id), PacketID.POSITION, struct.pack("<f", joint_pos))
         bravo.send(packet)
-        time.sleep(1)
+        time.sleep(0.1)
 
     # Shutdown the connection
     bravo.disconnect()
