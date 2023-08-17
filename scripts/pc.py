@@ -78,39 +78,47 @@ if __name__ == "__main__":
     config_num = int(input("Enter the desired configuration #: "))
     pitch_compliance = PitchCompliance(config_num)
 
-    logger = init_logger("PitchCompliance")
-    _file_logger = FileLogger(f'waves_config_{config_num}.log')
+    # logger = init_logger("PitchCompliance")
+    # _file_logger = FileLogger(f'hinsdale_out_of_plane_config_{config_num}.log')
+    # _file_logger = FileLogger(f'real_video_config_{config_num}.log')
+    # _file_logger = FileLogger('testing.log')
 
     init_time = time.time()
     running_arm = True
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind((socket.gethostname(), 6969))
-        sock.listen()
-        conn, addr = sock.accept()
+    volt_min = -4.262
+    volt_max = -1.48
+    extension_min = 0 # inches
+    extension_max = 11.25 # inches
+    sensor_mount_height = 27.75 # inches
 
-        # Enable the controller
-        pitch_compliance.enable()
+    # Enable the controller
+    pitch_compliance.enable()
 
-        # Let the controller do its thing
-        while True:
-            try:
-                _file_logger(
-                    time.time(),
-                    pitch_compliance._bravo.joint_positions,
-                    pitch_compliance._ni_device.voltage_reading,
-                )
+    # Let the controller do its thing
+    while True:
+        try:
+            _file_logger(
+                time.time(),
+                pitch_compliance._bravo.joint_positions,
+                pitch_compliance._ni_device.voltage_reading,
+            )
 
-                if time.time() - init_time > 10 and running_arm:
-                    pitch_compliance._bravo._run_controller(pitch_compliance.desired_config)
-                    running_arm = False # Reset bool
-                    time.sleep(0.1)
+            # Map voltage to linear extension
+            linear_data = np.interp(pitch_compliance._ni_device.voltage_reading, [volt_min, volt_max], [extension_min, extension_max])
 
-                raw_bytes = struct.pack('d', pitch_compliance._ni_device.voltage_reading[-1])
-                conn.send(raw_bytes)
+            # Map linear extension to pitch angle
+            pitch = np.rad2deg(linear_data / sensor_mount_height)
+            print(f"Pitch: {np.round(pitch, 3)}")
+
+            if time.time() - init_time > 10 and running_arm:
+                pitch_compliance._bravo._run_controller(pitch_compliance.desired_config)
+                running_arm = False # Reset bool
                 time.sleep(0.1)
 
-            except KeyboardInterrupt:
-                pitch_compliance.disable()
-                exit()
+            time.sleep(0.05)
+
+        except KeyboardInterrupt:
+            pitch_compliance.disable()
+            exit()
 

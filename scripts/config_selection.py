@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     # Specify the desird positions
     initial_config = [0, 1.57, 2.64, 0, 0.6, 3.04, 3.14]
-    configs_file = mat73.loadmat('data/hardware_configs.mat')
+    configs_file = mat73.loadmat('data/out_of_plane_config.mat')
     configs = configs_file['configs']
     configs_fl = np.fliplr(configs)
     final_configs_fl = np.insert(configs_fl, 0, initial_config, 0)

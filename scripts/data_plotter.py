@@ -38,7 +38,7 @@ class LivePlot:
         # self.ax1.tight_layout()
 
         # Animating pitch model
-        theta = np.radians(90 - data) * 5
+        theta = np.radians(90 - data)
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
         x = [0]
@@ -52,11 +52,17 @@ class LivePlot:
         # self.ax2.cla()
         self.ax2.set(xlim=(0, 1), ylim=(0, 1))
         self.ax2.plot(x, y, color='blue')
-        self.ax2.legend([f"Pitch (deg): {round(data * 5, 3)}"])
+        self.ax2.legend([f"Pitch (deg): {round(data, 3)}"])
         # plt.show()
 
 
 if __name__ == "__main__":
+    volt_min = -4.262
+    volt_max = -1.48
+    extension_min = 0 # inches
+    extension_max = 11.25 # inches
+    sensor_mount_height = 27.75 # inches
+
     xs = []
     ys = []
     queue_len = 50
@@ -77,15 +83,18 @@ if __name__ == "__main__":
 
         if data == 0:
             continue
+        
+        # Map voltage to linear extension
+        linear_data = np.interp(data, [volt_min, volt_max], [extension_min, extension_max])
 
-        linear_data = np.interp(data, [-4.258, -1.48], [0, 11.25])
-        sensor_mount_height = 27.75 # inches
+        # Map linear extension to pitch angle
         pitch = np.rad2deg(linear_data / sensor_mount_height)
-        print(pitch)
 
-        xs.append(time.time() - init_time)
-        ys.append(pitch)
+        # Set x and y values
+        xs.append(time.time() - init_time)  # Appending live plot timer
+        ys.append(pitch)                    # Appending pitch
 
+        # Implement window size
         xs = xs[-queue_len:]
         ys = ys[-queue_len:]
 
@@ -95,10 +104,10 @@ if __name__ == "__main__":
         ax1.set_title('Measured Pitch')
         ax1.set_ylabel('Pitch (deg)')
         ax1.set_xlabel('Time (s)')
-        # ax2.set(ylim=(0, 20))
+        # ax1.set(ylim=(0, 20))
 
         # Animating pitch frame
-        c, s = np.cos(90 - pitch), np.sin(90 - pitch)
+        c, s = np.cos(pitch), np.sin(pitch)
         R = np.array(((c, -s), (s, c)))
         x = [0]
         y = [0]
@@ -111,7 +120,7 @@ if __name__ == "__main__":
         ax2.cla()
         ax2.set(xlim=(0, 1), ylim=(0, 1))
         ax2.plot(x, y, color='blue')
-        ax2.legend([f"Pitch (deg): {round(90 - pitch, 3)}"])
+        ax2.legend([f"Pitch (deg): {round(pitch, 3)}"])
         ax2.set_title('Pitching Frame')
         ax2.set_ylabel('z')
         ax2.set_xlabel('x')

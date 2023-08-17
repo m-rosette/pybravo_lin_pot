@@ -13,7 +13,7 @@ class ArmConfig:
         
         self.load_matfile_data()
 
-    def load_matfile_data(self, data_file="data/hardware_configs.mat", flip_joint_order=True, add_home=True):
+    def load_matfile_data(self, data_file="data/out_of_plane_config.mat", flip_joint_order=True, add_home=True):
         # Load file from file path
         file = mat73.loadmat(data_file)
 

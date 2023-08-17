@@ -85,6 +85,7 @@ class BravoHandler:
         for i, position in enumerate(desired_config):
             packet = Packet(DeviceID(i+1), PacketID.POSITION, struct.pack("<f", position))
             self._bravo.send(packet)
+        time.sleep(0.1)
 
         # Could maybe try replacing "DeviceID.ALL_JOINTS" with "8"
         # one, two, three, four, five, six, seven = self.desired_config
